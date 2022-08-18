@@ -4,10 +4,12 @@ public class Card {
 
     private Suit suit;
     private Rank rank;
+    private String name;
 
-    public Card(Suit suit, Rank rank) {
+    public Card(Suit suit, Rank rank, String name) {
         this.suit = suit;
         this.rank = rank;
+        this.name = name;
     }
 
     public int getRankNumber() {
@@ -18,10 +20,19 @@ public class Card {
         return suit;
     }
 
+    public String getName() {
+        return name;
+    }
+
     @Override
     public String toString() {
         return "Card --> " +
                 "suit : " + suit +
-                ", rank : " + rank;
+                ", rank : " + rank +
+                ", name : " + name;
     }
+
+
+
+
 }

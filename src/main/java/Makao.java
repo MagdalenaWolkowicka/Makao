@@ -19,14 +19,16 @@ public class Makao {
         ArrayList<Card> cardsList = new ArrayList<>();
         for (Suit suitValue : Suit.values()) {
             for (Rank value : Rank.values()) {
-                cardsList.add(new Card(suitValue, value));
+                cardsList.add(new Card(suitValue, value, "zwykła karta"));
             }
         }
+        cardsList.add(new Card(Suit.HEART, Rank.ACE, "Joker 1"));
+        cardsList.add(new Card(Suit.CLUB, Rank.ACE, "Joker 2"));
         Collections.shuffle(cardsList);
         return cardsList;
     }
 
-    public List<Card> giveCardsToPlayer(List<Card> allCards) {
+    private List<Card> giveCardsToPlayer(List<Card> allCards) {
         Random random = new Random();
         List<Card> cards = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
@@ -34,8 +36,6 @@ public class Makao {
             Card card = allCards.get(number);
             cards.add(card);
             removeCard(card, allCards);
-            //allCards.remove(number);
-
         }
         return cards;
     }
@@ -50,32 +50,18 @@ public class Makao {
 
     public Card getOneCard(List<Card> cards) {
         Card card = cards.get(0);
-        //cards.remove(card);
         removeCard(card, cards);
         return card;
     }
 
-    public List<Card> getMatchingCards(Card lastCard, List<Card> player2Cards) {
+    private List<Card> getMatchingCards(Card lastCard, List<Card> player2Cards) {
         return player2Cards.stream()
-                .filter(card1 -> card1.getRankNumber() == lastCard.getRankNumber() || card1.getSuit() == lastCard.getSuit())
+                .filter(card1 -> card1.getName() == "Joker 1" || card1.getName() == "Joker 2" || card1.getRankNumber() == lastCard.getRankNumber() || card1.getSuit() == lastCard.getSuit())
                 .collect(Collectors.toList());
     }
 
-//    public List<Card> getMatchingSuitCards(Card card, List<Card> player2Cards) {
-//        return player2Cards.stream()
-//                .filter(card1 -> card1.getSuit() == card.getSuit())
-//                .collect(Collectors.toList());
-//    }
 
-//    public List<Card> getMatchingCards(List<Card> listMatchingSuits, List<Card> listMatchingRank) {
-//        List<Card> matchingCards = new ArrayList<>();
-//
-//        matchingCards.addAll(listMatchingRank);
-//        matchingCards.addAll(listMatchingSuits);
-//        return matchingCards;
-//    }
-
-    public void removeCard(Card card, List<Card> cards) {
+    private void removeCard(Card card, List<Card> cards) {
         cards.remove(card);
     }
 
@@ -83,11 +69,16 @@ public class Makao {
     public Card putTheCardPlayer2(Card lastCard, List<Card> player2Cards) {
         Card actualCard = null;
         Card newCard = null;
-        List<Card> matchingCards = getMatchingCards(lastCard, player2Cards);
+        List<Card> matchingCards = new ArrayList<>();
+        if (lastCard.getName() == "Joker 1" || lastCard.getName() == "Joker 2") {
+            matchingCards.addAll(player2Cards);
+        } else {
+            matchingCards = getMatchingCards(lastCard, player2Cards);
+        }
         if (!matchingCards.isEmpty()) {
-         actualCard =  matchingCards.get(0);
-         removeCard(actualCard, player2Cards);
-        } else{
+            actualCard = matchingCards.get(0);
+            removeCard(actualCard, player2Cards);
+        } else {
             actualCard = lastCard;
             newCard = getOneCard(allCards);
             player2Cards.add(newCard);
@@ -95,29 +86,33 @@ public class Makao {
         return actualCard;
     }
 
-    public Card getMatchingCartFromMyCards(List<Card> myCards, int number) {
+    private Card getMatchingCartFromMyCards(List<Card> myCards, int number) {
         return myCards.get(number);
     }
 
-    public boolean isCardMatching(Card lastCard, Card card) {
-        if (card.getRankNumber() == lastCard.getRankNumber() || card.getSuit() == lastCard.getSuit()) {
+    private boolean isCardMatching(Card lastCard, Card card) {
+        if (lastCard.getRankNumber() == card.getRankNumber() || lastCard.getSuit() == card.getSuit()
+                || lastCard.getName().equals("Joker 1") || lastCard.getName().equals("Joker 2")) {
             return true;
+        } else if (lastCard.getRankNumber() != card.getRankNumber() && lastCard.getSuit() != card.getSuit()
+                && lastCard.getName() == null) {
+            return false;
         }
         return false;
     }
 
-    public Card putTheCardFromMyCards(Card lastCard, Card newCard, List<Card> myCards, int number) {
+    public Card putTheCardFromMyCards(Card lastCard, List<Card> myCards, int number) {
         Card card = getMatchingCartFromMyCards(myCards, number);
         Card actualCard = null;
         Card cardToAdd = null;
         if (isCardMatching(lastCard, card)) {
             actualCard = card;
             removeCard(card, myCards);
-        } else {
+        } else if (!isCardMatching(lastCard, card)) {
             actualCard = lastCard;
             cardToAdd = getOneCard(allCards);
             myCards.add(cardToAdd);
-            System.out.println("Dupa");
+            System.out.println("Karta nie pasuje! Za karę dobierasz kartę :P");
         }
         return actualCard;
 

@@ -10,48 +10,66 @@ public class Controller {
     private List<Card> myCards = makao.getMyCards();
     private List<Card> player2Cards = makao.getPlayer2Cards();
     private boolean running = true;
+    private Scanner scanner = new Scanner(System.in);
 
     public void start() {
-        Scanner scanner = new Scanner(System.in);
+        scanner = new Scanner(System.in);
         System.out.println("Gra w Makao!!!\n");
         Card card = makao.getOneCard(allCards);
         System.out.println("Pierwsza karta");
         System.out.println(card);
         System.out.println();
         do {
-            System.out.println("Karty przeciwnika");
-            makao.showCards(player2Cards);
-            System.out.println();
-            System.out.println("\nAktualna karta:");
-            card = makao.putTheCardPlayer2(card, player2Cards);
-            System.out.println(card);
+            card = putPlayers2Card(card);
             if (makao.getPlayer2Cards().isEmpty()) {
                 running = false;
             }
-            System.out.println();
-            System.out.println("Twoje karty:");
-            makao.showCards(myCards);
-            System.out.println();
-            System.out.println("Wybierz kartę");
-            int cartNumber = scanner.nextInt();
-            int index = cartNumber -1;
-            card = makao.putTheCardFromMyCards(card, myCards.get(index), myCards, index);
-            System.out.println("\nAktualna karta:");
-            System.out.println(card);
+            card = putMyCard(card);
+
             if (makao.getMyCards().isEmpty()) {
                 running = false;
             }
         } while (running);
         printWinner();
+    }
 
+    private Card putPlayers2Card(Card card) {
+        System.out.println("\nKarty przeciwnika");
+        makao.showCards(player2Cards);
+        System.out.println();
+        System.out.println("\nAktualna karta:");
+        card = makao.putTheCardPlayer2(card, player2Cards);
+        System.out.println(card);
+        return card;
+    }
 
+    public Card putMyCard(Card card) {
+        System.out.println("\nTwoje karty:");
+        makao.showCards(myCards);
+        System.out.println("\nWybierz kartę");
+        System.out.println("Jeśli żadna nie pasuje, wybierz 0");
+        int cartNumber = scanner.nextInt();
+        int index = cartNumber - 1;
+        if (index == -1) {
+            Card newCard = makao.getOneCard(allCards);
+            myCards.add(newCard);
+            System.out.println("Dobieram kartę");
+        } else if (index >= 0 && index < myCards.size()) {
+            card = makao.putTheCardFromMyCards(card, myCards, index);
+            System.out.println("\nAktualna karta:");
+            System.out.println(card);
+        } else {
+            System.out.println("Błędny wybór");
+            putMyCard(card);
+        }
+        return card;
     }
 
     private void printWinner() {
         System.out.println("Koniec!");
         if (myCards.isEmpty()) {
             System.out.println("Gratulacje! Wygrałeś!");
-        } else {
+        } else if (player2Cards.isEmpty()) {
             System.out.println("Przegrałeś ;(");
         }
     }
